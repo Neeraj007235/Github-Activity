@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Github } from 'lucide-react';
 import { Toaster } from './components/ui/sonner';
 import SearchCard from './components/SearchCard';
 import RepoTable from './components/RepoTable';
