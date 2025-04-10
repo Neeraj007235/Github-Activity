@@ -18,7 +18,7 @@ interface DayCommit {
 const CommitBarChart = ({ username }: Props) => {
   const [commitData, setCommitData] = useState<DayCommit[]>([]);
   const [loading, setLoading] = useState(false);
-
+ 
   useEffect(() => {
     const fetchCommitActivity = async () => {
       if (!username) return;
@@ -26,9 +26,9 @@ const CommitBarChart = ({ username }: Props) => {
       setLoading(true);
       try {
         const repos = await fetchUserRepos(username);
-
+        
         const reposToFetch = repos.slice(0, 10);
- 
+        
         const commitsPromises = reposToFetch.map(async (repo: any) => {
           return await fetchRepoCommits(username, repo.name);
         });
@@ -40,8 +40,8 @@ const CommitBarChart = ({ username }: Props) => {
         const lastWeek = [...Array(7)].map((_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - i);
-          return date.toISOString().split('T')[0]; 
-        }).reverse(); 
+          return date.toISOString().split('T')[0];
+        }).reverse();
         
         const commitsByDate = allCommits.reduce((acc: Record<string, number>, commit: any) => {
           const date = commit.commit.author.date.split('T')[0];
@@ -70,9 +70,22 @@ const CommitBarChart = ({ username }: Props) => {
         setLoading(false);
       }
     };
-
+    
     fetchCommitActivity();
   }, [username]);
+
+  // Custom tooltip component for dark mode compatibility
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow">
+          <p className="text-gray-900 dark:text-gray-100 font-medium">{`Date: ${label}`}</p>
+          <p className="text-blue-600 dark:text-blue-400">{`${payload[0].value} commits`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card>
@@ -92,15 +105,13 @@ const CommitBarChart = ({ username }: Props) => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={commitData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="displayDate" 
+                <XAxis
+                  dataKey="displayDate"
                   tick={{ fontSize: 12 }}
+                  className="text-gray-900 dark:text-gray-100"
                 />
-                <YAxis />
-                <Tooltip 
-                  labelFormatter={(label) => `Date: ${label}`}
-                  formatter={(value) => [`${value} commits`, 'Commits']}
-                />
+                <YAxis className="text-gray-900 dark:text-gray-100" />
+                <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="commits" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

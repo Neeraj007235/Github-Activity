@@ -17,7 +17,7 @@ interface Props {
 const CommitsChart = ({ username }: Props) => {
   const [commitData, setCommitData] = useState<CommitData[]>([]);
   const [loading, setLoading] = useState(false);
-
+  
   useEffect(() => {
     const fetchCommitData = async () => {
       if (!username) return;
@@ -61,9 +61,22 @@ const CommitsChart = ({ username }: Props) => {
         setLoading(false);
       }
     };
-
+    
     fetchCommitData();
   }, [username]);
+
+  // Custom tooltip component for dark mode compatibility
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow">
+          <p className="text-gray-900 dark:text-gray-100 font-medium">{`Date: ${label}`}</p>
+          <p className="text-blue-600 dark:text-blue-400">{`${payload[0].value} commits`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card>
@@ -83,20 +96,18 @@ const CommitsChart = ({ username }: Props) => {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={commitData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tickFormatter={(date) => date.substring(5)} 
-                  interval={4} 
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(date) => date.substring(5)}
+                  interval={4}
+                  className="text-gray-900 dark:text-gray-100"
                 />
-                <YAxis />
-                <Tooltip 
-                  labelFormatter={(date) => `Date: ${date}`}
-                  formatter={(value) => [`${value} commits`, 'Commits']}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#3b82f6" 
+                <YAxis className="text-gray-900 dark:text-gray-100" />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#3b82f6"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   activeDot={{ r: 6 }}
